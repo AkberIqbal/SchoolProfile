@@ -1,0 +1,147 @@
+    <script type="text/javascript" src="http://vs13uatw:90/Style%20Library/jquery.min.js"></script>	
+    <script type="text/javascript" src="http://vs13uatw:90/Style%20Library/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js"></script>
+
+
+<script type='text/javascript'>
+
+    angular.module("UploadSchoolProfiles", [])
+    .service('ajaxPostService', function ($http) {
+
+                this.ajaxCall = function (destinationAddress, dataToBePassed) {
+            var Description = "Starting upload...";
+            
+            try{
+            $.ajax({
+                url: destinationAddress
+                               , method: "POST"
+                               , data: dataToBePassed
+                               , contentType: "application/json;odata=verbose"
+                               , headers: { "Accept": "application/json; odata=verbose", "X-RequestDigest": $("#__REQUESTDIGEST").val() }
+                               , async: true
+                               , success: handleData
+                               , error: handleError
+            });
+
+            function handleData(data) { console.log('handle data');  Description += 'Item added successfully'; }
+            function handleError(error) { console.log('handle error'+ JSON.stringify(error)); Description += 'Error' + JSON.stringify(error); }
+        }
+        catch (err) { console.log(err.Message); return Description; };
+
+            /*
+            try {
+
+            $http({
+            url: destinationAddress
+            , method: "POST"
+            , data: dataToBePassed
+            , contentType: "application/json;odata=verbose"
+            , headers: { "Accept": "application/json; odata=verbose", "X-RequestDigest": $("#__REQUESTDIGEST").val() }
+            , async: false
+            }).then(function mySucces(response) {
+            console.log('Item added successfully');
+            Description += 'Item added successfully';
+            return Description + '[EXITING NOW] <br/>';
+            }, function myError(response) {
+            Description += 'myError' + JSON.stringify(response);
+            console.log('myError' + JSON.stringify(response));
+            return Description + '[EXITING NOW] <br/>';
+                    
+            });
+            }
+            catch (err) { console.log(err.Message);};
+            */
+
+        };
+    })
+    .controller("SchoolDataUpload", function ($scope, $http, ajaxPostService) {
+        $scope.Message = "hello from upload utility";
+        $scope.MySchoolsObject = "";
+        $scope.FetchData = "not started";
+  
+        $http({
+            url: "http://vs13uatw:90/JoinEB/Documents/SchoolsData.txt"
+        }).then(function mySucces(result) {
+            try {
+                $scope.MySchoolsObject = result.data;
+                $("#resultData").append("<ul>");
+                for (var i = 0; i < $scope.MySchoolsObject.length; i++) {
+                    //$("#resultData").append("<li> " + $scope.MySchoolsObject[i].SchoolName + " </li> ");
+                }
+                $("#resultData").append("</ul>");
+                $scope.FetchData = "complete";
+                //console.log("we have " + $scope.MySchoolsObject.length + " rows");
+                $scope.Message = "we have " + $scope.MySchoolsObject.length + " rows";
+
+            } catch (err) { console.log("Error caught!! " + err.Message + " &" + err.number); }
+        }, function myError(response) {
+            console.log(response); $scope.Message += "error !!";
+        });
+
+        var siteurl = "http://vs13uatw:90/JoinEB/_api/web/lists/getbytitle('SchoolProfiles')/items";
+                $scope.UploadData = function () {
+            console.log("inside Submit");
+
+            for (var j = 0; j < $scope.MySchoolsObject.length; j++) {
+
+                // update 'SP.Data.[SchoolProfiles]ListItem'
+                var data = {
+                    __metadata: { 'type': 'SP.Data.SchoolProfilesListItem' }
+                , Title: $scope.MySchoolsObject[j].EPSSchoolID
+                , SchoolName: $scope.MySchoolsObject[j].SchoolName
+                , Province: $scope.MySchoolsObject[j].Province
+                , City: $scope.MySchoolsObject[j].City
+                , SSC: $scope.MySchoolsObject[j].SSC
+                , HSSC: $scope.MySchoolsObject[j].HSSC
+                , MSP: $scope.MySchoolsObject[j].MSP
+                , SSCScience: $scope.MySchoolsObject[j].SSCScience
+                , SSCHumanities: $scope.MySchoolsObject[j].SSCHumanities
+                , HSSCPreMedical: $scope.MySchoolsObject[j].HSSCPreMedical
+                , HSSCPreEngineering: $scope.MySchoolsObject[j].HSSCPreEngineering
+                , HSSCScience: $scope.MySchoolsObject[j].HSSCScience
+                , HSSCGeneral: $scope.MySchoolsObject[j].HSSCGeneral
+                , HSSCHumanities: $scope.MySchoolsObject[j].HSSCHumanities
+                , HSSCCommerce: $scope.MySchoolsObject[j].HSSCCommerce
+                    /**/
+                , InstructionMedium0: $scope.MySchoolsObject[j].InstructionMedium
+                , Status: $scope.MySchoolsObject[j].Status
+                };
+                var FinalData = JSON.stringify(data);
+                console.log(FinalData + '<br/>');
+                $scope.ajaxCall = ajaxPostService.ajaxCall(siteurl, FinalData);
+                $("#activityLog").append($scope.ajaxCall + '<br/>');
+            }
+        };
+
+    })
+.config(function () {
+    startTime = new Date().toLocaleTimeString();
+    var completeTime = new Date().getMilliseconds();
+    console.log("services module config: " + startTime + ":" + completeTime);
+});
+
+
+</script>
+
+
+<div ng-app="UploadSchoolProfiles"> 
+
+<div class="container" ng-controller="SchoolDataUpload">
+{{Message}} - STATUS: {{FetchData}} <br />
+<button type="button" id="Upload" ng-click="UploadData()">upload</button>
+
+<div id="resultData">
+
+</div>
+
+
+
+<div id="activityLog">
+
+</div>
+</div>
+
+
+</div>

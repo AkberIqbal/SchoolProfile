@@ -1,0 +1,2 @@
+{"EPSSchoolID":"90001","SchoolName":"Sanjan Nagar Public Education Trust High School","Province":"Balochistan","City":"Quetta","SSC":"No","HSSC":"Yes","MSP":"Yes","SSCScience":"No","SSCHumanities":"No","HSSCPreMedical":"Yes","HSSCPreEngineering":"No","HSSCScience":"Yes","HSSCGeneral":"Yes","HSSCHumanities":"Yes","HSSCCommerce":"Yes","InstructionMedium":"local","Status":"Boys"}
+
